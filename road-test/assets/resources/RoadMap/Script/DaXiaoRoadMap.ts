@@ -13,7 +13,7 @@ export class DaXiaoRoadMap extends RoadMapBase {
     private DA: number = 2;
 
     protected childStart(): void {
-        this.registerRoad(this.HE, new RoadStyle(RoadDisplay.MARK, '#000000'));
+        this.registerRoad(this.HE, new RoadStyle(RoadDisplay.MARK, '#00FF00'));
         this.registerRoad(this.XIAO, new RoadStyle(RoadDisplay.BLOCK, '#0000FF'));
         this.registerRoad(this.DA, new RoadStyle(RoadDisplay.BLOCK, '#FF0000'));
     }

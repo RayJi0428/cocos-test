@@ -117,81 +117,122 @@ export class RoadMapBase extends Component {
         let maxRow: number = this.rowCount - 1;
         let turnRight: boolean = false;//是否往右走
         let preVO: RoadVO = null;
+        let preStyle: RoadStyle = null;
+        let nextStyle: RoadStyle = null;
         let lastLineVO: RoadVO = null;//畫線線段最後一顆(往前追朔起點)
-        trends.forEach((nextColor: number, index: number) => {
-            let latest: boolean = index == trends.length - 1;
-            if (latest) {
-                console.log(index);
+        let lastColor: number = -1;
+
+        //先從頭去掉非block類型的資料
+        while (trends.length > 0 && this.roadStyleMap.get(trends[0]).display != RoadDisplay.BLOCK) {
+            trends.shift();
+        }
+
+        for (let ti: number = 0; ti < trends.length; ++ti) {
+            let nextColor: number = trends[ti];
+            let isLast: boolean = ti == trends.length - 1;//debug下斷點用
+            if (isLast) {
+                console
             }
-            //第一顆
-            if (index == 0) {
+            nextStyle = this.roadStyleMap.get(nextColor);
+            preStyle = preVO && this.roadStyleMap.get(preVO.color);
+
+            //第一顆(lastColor必須排除和局類型)
+            if (ti == 0) {
                 map[colorColumn] = [];
+                lastColor = nextColor;
             }
-            //顏色變換(新增一欄&長度歸零)
-            else if (preVO.color != nextColor) {
-                colorColumn++;
-                nextRow = 0;
-                nextCol = colorColumn;
-                maxRow = this.rowCount - 1;
-                turnRight = false;
-                //顏色變換時,如果有存了畫線vo,往前遞迴標記畫線
+
+            //換欄 = 新的是BLOCK型 && 與先前顏色不同
+            let changeColumn: boolean = nextStyle.display == RoadDisplay.BLOCK && (lastColor != nextColor);
+
+            //換列 = 同色 or 其一為PASS型
+            let changeRow: boolean =
+                preVO == null ||//第一顆
+                (lastColor == nextColor) ||//顏色接顏色
+                (lastColor != nextColor && nextStyle.display == RoadDisplay.PASS) ||//顏色接PASS
+                (preStyle && preStyle.display == RoadDisplay.PASS && lastColor == nextColor);//PASS接顏色
+            //換欄(新增一欄&長度歸零)------------------------------------------------------------------------
+            if (changeColumn) {
+                lastColor = nextColor;
+
+                //顏色變換時,如果已經有存了畫線vo,往前遞迴標記畫線
                 if (lastLineVO != null) {
                     this.markLine(lastLineVO);
                     lastLineVO = null;
                 }
-            }
 
-            //還沒向右:當下判斷是否需要向右,已經向右:繼續向右直到換色
-            if (!turnRight) {
-                //到達邊界
-                if (nextRow > maxRow) {
-                    turnRight = true;
-                    nextRow = maxRow;
+                colorColumn++;
+                //建立新欄
+                if (!map[colorColumn]) {
+                    map[colorColumn] = [];
                 }
-                //目標點已存在資料
-                else if (map[nextCol] != null && map[nextCol][nextRow] != null) {
-                    turnRight = true;
-                    maxRow = nextRow - 1;//向右時,要重新調整列數上限
-                    nextRow = maxRow;
-                }
-            }
+                let newColumnVO: RoadVO = new RoadVO(colorColumn, 0, nextColor);
+                preVO = map[colorColumn][0] = newColumnVO;
 
-            //向右邏輯(已經向右:繼續向右直到換色)
-            if (turnRight) {
-                //已經是第一列的向右,需要同步調整colorColumn
-                if (maxRow == 0) {
-                    colorColumn++;
-                }
-                //換色距離過遠,要同步調整colorColumn,讓發生換色時能出現在畫面內
-                else if (nextCol - colorColumn >= (this.columnCount - this.blankColCount)) {
-                    colorColumn++;
-                }
-                nextCol++;
+                nextRow = 1;
+                nextCol = colorColumn;
+                maxRow = this.rowCount - 1;
+                turnRight = false;
             }
+            //換列------------------------------------------------------------------------
+            else if (changeRow) {
+                //還沒向右:當下判斷是否需要向右,已經向右:繼續向右直到換色
+                if (!turnRight) {
+                    //到達邊界
+                    if (nextRow > maxRow) {
+                        turnRight = true;
+                        nextRow = maxRow;
+                    }
+                    //目標點已存在資料
+                    else if (map[nextCol] != null && map[nextCol][nextRow] != null) {
+                        turnRight = true;
+                        maxRow = nextRow - 1;//向右時,要重新調整列數上限
+                        nextRow = maxRow;
+                    }
+                }
 
-            //建立新欄
-            if (!map[nextCol]) {
-                map[nextCol] = [];
+                //向右邏輯(已經向右:繼續向右直到換色)
+                if (turnRight) {
+                    //已經是第一列的向右,需要同步調整colorColumn
+                    if (maxRow == 0) {
+                        colorColumn++;
+                    }
+                    //換色距離過遠,要同步調整colorColumn,讓發生換色時能出現在畫面內
+                    else if (nextCol - colorColumn >= (this.columnCount - this.blankColCount)) {
+                        colorColumn++;
+                    }
+                    nextCol++;
+                }
+
+                //建立新欄
+                if (!map[nextCol]) {
+                    map[nextCol] = [];
+                }
+                //不能超過目前設定列上限
+                nextRow = Math.min(nextRow, maxRow);
+                let newRowVO: RoadVO = new RoadVO(nextCol, nextRow, nextColor);
+                map[nextCol][nextRow] = newRowVO;
+                nextRow++;
+
+                //是否可與上一顆串接(同色 or 其一為PASS)
+                let isConnect: boolean =
+                    (preVO && newRowVO.color == preVO.color) ||
+                    (preStyle && (preStyle.display == RoadDisplay.PASS || nextStyle.display == RoadDisplay.PASS));
+                if (isConnect) {
+                    newRowVO.preVO = preVO;
+                    preVO.nextVO = newRowVO;
+                }
+                preVO = newRowVO;
+                //轉右表示畫線,更新畫線最後一顆,準備追朔用
+                if (turnRight) {
+                    lastLineVO = newRowVO;
+                }
             }
-            //不能超過目前設定列上限
-            nextRow = Math.min(nextRow, maxRow);
-            let vo: RoadVO = new RoadVO();
-            vo.color = nextColor;
-            map[nextCol][nextRow] = vo;
-            vo.col = nextCol;
-            vo.row = nextRow;
-            nextRow++;
-            //紀錄同色上一顆(不同色就不紀錄pre)
-            if (preVO && vo.color == preVO.color) {
-                vo.preVO = preVO;
-                preVO.nextVO = vo;
+            //同格------------------------------------------------------------------------
+            else {
+                preVO.markCount++;
             }
-            preVO = vo;
-            //轉右表示畫線,更新畫線最後一顆,準備追朔用
-            if (turnRight) {
-                lastLineVO = vo;
-            }
-        }, this);
+        }
 
         //最後一次可能沒有變換顏色,所以要再檢查畫線vo,往前遞迴標記畫線
         if (lastLineVO != null) {
@@ -279,6 +320,15 @@ export class RoadVO {
     public color: number = -1;
 
     public linePt: Vec2[] = [];
+
+    /**同格數量標記 */
+    public markCount: number = 0;
+
+    constructor(col: number, row: number, color: number) {
+        this.col = col;
+        this.row = row;
+        this.color = color;
+    }
 }
 
 

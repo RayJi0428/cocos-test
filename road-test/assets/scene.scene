@@ -506,7 +506,7 @@
       "__uuid__": "308eae93-b9d2-4e81-bb82-7bca475cea2e",
       "__expectedType__": "cc.Prefab"
     },
-    "printMap": false,
+    "printMap": true,
     "_id": "eadJoebntFsKrUL3Juy1TM"
   },
   {
@@ -730,7 +730,7 @@
       "__uuid__": "b6daea4f-997f-4766-8165-0663100b7e85",
       "__expectedType__": "cc.Prefab"
     },
-    "printMap": true,
+    "printMap": false,
     "_id": "e9zUceP8JK0bGCWOugi0J/"
   },
   {
