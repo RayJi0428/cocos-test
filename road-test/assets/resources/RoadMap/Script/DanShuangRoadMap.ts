@@ -1,5 +1,5 @@
 import { _decorator, Component, Graphics, Node, Sprite, UITransform, Vec2 } from 'cc';
-import { RoadMapBase, RoadStyle, RoadType } from './Base/RoadMapBase';
+import { RoadMapBase, RoadStyle, RoadDisplay } from './Base/RoadMapBase';
 const { ccclass, property } = _decorator;
 
 @ccclass('DanShuangRoadMap')
@@ -11,8 +11,8 @@ export class DanShuangRoadMap extends RoadMapBase {
     private DAN: number = 1;
 
     protected childStart(): void {
-        this.registerRoad(this.SHUANG, new RoadStyle(RoadType.BLOCK, '#0000FF'));
-        this.registerRoad(this.DAN, new RoadStyle(RoadType.BLOCK, '#FF0000'));
+        this.registerRoad(this.SHUANG, new RoadStyle(RoadDisplay.BLOCK, '#0000FF'));
+        this.registerRoad(this.DAN, new RoadStyle(RoadDisplay.BLOCK, '#FF0000'));
     }
 }
 

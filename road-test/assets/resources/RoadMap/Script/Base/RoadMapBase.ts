@@ -282,7 +282,7 @@ export class RoadVO {
 }
 
 
-export enum RoadType {
+export enum RoadDisplay {
     /**佔格、換欄 */
     BLOCK = 0,
     /**穿過、不換欄 */
@@ -293,17 +293,17 @@ export enum RoadType {
 
 export class RoadStyle {
     /**路子繪製類型 */
-    public type: RoadType;
+    public displsy: RoadDisplay;
     /**畫線顏色 */
     public lineColorHex: string;
 
     /**
      * 
-     * @param type 路子繪製類型
+     * @param displsy 路子繪製類型
      * @param lineColorHex 畫線顏色
      */
-    public constructor(type: RoadType, lineColorHex: string) {
-        this.type = type;
+    public constructor(displsy: RoadDisplay, lineColorHex: string) {
+        this.displsy = displsy;
         this.lineColorHex = lineColorHex;
     }
 }
