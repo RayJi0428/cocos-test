@@ -293,17 +293,17 @@ export enum RoadDisplay {
 
 export class RoadStyle {
     /**路子繪製類型 */
-    public displsy: RoadDisplay;
+    public display: RoadDisplay;
     /**畫線顏色 */
     public lineColorHex: string;
 
     /**
      * 
-     * @param displsy 路子繪製類型
+     * @param display 路子繪製類型
      * @param lineColorHex 畫線顏色
      */
-    public constructor(displsy: RoadDisplay, lineColorHex: string) {
-        this.displsy = displsy;
+    public constructor(display: RoadDisplay, lineColorHex: string) {
+        this.display = display;
         this.lineColorHex = lineColorHex;
     }
 }
